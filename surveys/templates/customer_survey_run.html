@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% load answer_field_template %}
+
+{% block content %}
+<div class="">
+    <h1 class="mt-5">{{ survey.name }}</h1>
+    <div class="container">
+        <form id="survey" action="">
+            {% csrf_token %}
+            {% for question in survey.question_set.all %}
+                <div id="{{ question.id }}"
+                     class="question card mb-4 shadow-sm"
+                     data-question-type="{{ question.type }}"
+                >
+                    <div class="card-header">
+                        {{ question.text }}
+                    </div>
+                    <div class="card-body">
+                        {% if question.answer_set.all|length %}
+                            <div class="row">
+                                {% for answer in question.answer_set.all %}
+                                    <div class="col-md-6">
+                                        {% draw_answer question.type answer.id answer.text %}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="form-group">
+                                <textarea name="test" class="form-control" rows="3"></textarea>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+            <input id="survey_send" type="submit" class="btn btn-lg btn-success" value="Отправить">
+        </form>
+    </div>
+</div>
+{% endblock %}

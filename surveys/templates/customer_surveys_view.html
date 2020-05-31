@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="">
+    <h1 class="mt-5">Список опросов</h1>
+    <div class="container">
+        <div class="row">
+            {% for survey in surveys %}
+                <div class="col-md-4">
+                    <div class="card mb-4 shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ survey.name }}</h5>
+                            <p class="card-text">
+                                {{ survey.description }}
+                            </p>
+                            <a class="btn btn-primary" href="{% url 'customer_survey_run' survey_id=survey.id %}">Пройти опрос</a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

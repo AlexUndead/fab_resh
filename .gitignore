@@ -1,0 +1,6 @@
+.idea/
+__pycache__/
+.surves/__pycache__/
+.surves/migrations/__pycache__/
+*.pyc
+.env

@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="">
+    <h1 class="mt-5">Страница просмотра и редактирования опроса</h1>
+    <div class="container">
+        <form action="" class="form-signin" method="post">
+            <div class="form-group">
+                {% csrf_token %}
+                <div class="h4">Настройки опроса</div>
+                <hr>
+                {% for input in form %}
+                    <div class="form-group">
+                        {{ input.errors }}
+                        <label for="{{ input.id_for_label }}">{{ input.label }}</label>
+                        {{ input }}
+                    </div>
+                {% endfor %}
+                <button type="submit" class="btn btn-lg btn-primary btn-block">Сохранить настройки</button>
+            </div>
+        </form>
+        <form class="form-signin" action="{% url 'survey_delete' survey_id=survey.id %}" method="post">
+            {% csrf_token %}
+            <input type="submit" class="btn btn-lg btn-danger btn-block" value="Удалить опрос">
+        </form>
+        <hr>
+        <h2 class="text-center">Вопросы</h2>
+        <hr>
+        <div class="row">
+            {% for question in survey.question_set.all %}
+                <div class="col-md-4">
+                    <div class="card mb-4 shadow-sm">
+                        <div class="card-body">
+                            <div class="card-text">
+                                {{ question.text }}
+                            </div>
+                            <div class="card-text">
+                                <p>
+                                    <a class="btn btn-primary" href="{% url 'question_view' survey_id=survey.id question_id=question.id %}">изменить вопрос</a>
+                                </p>
+                                <form action="{% url 'question_delete' survey_id=survey.id question_id=question.id %}" method="post">
+                                    {% csrf_token %}
+                                    <input class="btn btn-outline-danger" type="submit" value="удалить вопрос">
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        <div>
+            <a class="btn btn-lg btn-success" href="{% url 'question_create' survey_id=survey.id %}">
+                <div>Страница создания вопросов</div>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

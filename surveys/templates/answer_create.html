@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="">
+    <h1 class="mt-5">Страница создания ответа</h1>
+    <div class="container">
+        <form action="" class="form-signin" method="post">
+            <div class="form-group">
+                {% csrf_token %}
+                <div class="h4">Настройки ответа</div>
+                <hr>
+                <div class="form-group">
+                    {{ answer_form.text.errors }}
+                    <label for="{{ answer_form.text.id_for_label }}">{{ answer_form.text.label }}</label>
+                    {{ answer_form.text }}
+                </div>
+                <div class="form-group">
+                    {{ answer_form.type.errors }}
+                    <label for="{{ answer_form.type.id_for_label }}">{{ answer_form.type.label }}</label>
+                    {{ answer_form.type }}
+                </div>
+                <button type="submit" class="btn btn-lg btn-primary btn-block">сохранить настройки</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
