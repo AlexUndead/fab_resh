@@ -4,6 +4,7 @@ function Survey(survey){
     this.questions = survey.find('.question');
     this.surveyErrors = {};
     this.API_URL = '/survey/result/save/';
+    this.SURVEY_RESULT_URL = '/survey/result/view/'
     this.getCSRFTokenValue = function(){
         /*Получение значения CSRF Token*/
         return $('input[name="csrfmiddlewaretoken"]').val()
@@ -100,15 +101,22 @@ function Survey(survey){
         /*Проверка объекта ошибок на пустоту*/
         return JSON.stringify(this.surveyErrors) == '{}';
     }
+    this.getSlugUrl = function(slug){
+        return window.location.host + this.SURVEY_RESULT_URL + slug + '/';
+    }
     this.send = function(){
+        var surveySelf = this;
         /*Отправка данных по опросу*/
         $.ajax({
             url: this.API_URL,
             type: 'POST',
             headers: {"X-CSRFToken": this.getCSRFTokenValue()},
             data: JSON.stringify({'result': this.surveyResult}),
-            success: function(){
-                console.log('success');
+            success: function(data){
+                var slug = data.slug
+
+                $('#slug').val(surveySelf.getSlugUrl(slug))
+                $('#slugPopup').modal();
             },
             dataType: 'json',
             contentType: 'application/json',

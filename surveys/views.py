@@ -232,7 +232,6 @@ class CustomerSurveyResultView(View):
         customer_result_obj = get_object_or_404(Result, slug=slug)
         customer_result_decode = json.loads(customer_result_obj.result)
         self.validation_survey(customer_result_decode)
-        print(customer_result_decode)
 
         return render(request, 'customer_survey_result_view.html', {'valid_survey_result': customer_result_decode})
 
