@@ -1,13 +1,14 @@
 function Survey(survey){
     this.survey = survey;
+    this.survey_id = survey.attr('id');
     this.questions = survey.find('.question');
     this.surveyErrors = {};
+    this.API_URL = '/survey/result/save/';
     this.getCSRFTokenValue = function(){
         /*Получение значения CSRF Token*/
         return $('input[name="csrfmiddlewaretoken"]').val()
     };
-    this.surveyResult = {
-    };
+    this.surveyResult = {};
     this.textareaValidator = function(question){
         /*Валидатор вопросов с открытым ответом*/
         var textareaValue = question.find("textarea").val();
@@ -15,7 +16,10 @@ function Survey(survey){
         if(!textareaValue){
             this.surveyErrors[question.attr('id')] = 'Введите свой вариант ответа';
         } else {
-            this.surveyResult[question.attr('id')] = textareaValue;
+            this.surveyResult[question.attr('id')] = {
+                'type': question.data('question-type'),
+                'value': textareaValue,
+            }
         }
     };
     this.radioValidator = function(question){
@@ -25,7 +29,10 @@ function Survey(survey){
         if(!checkedRadio.length){
             this.surveyErrors[question.attr('id')] = 'Нужно выбрать хотя-бы один варинат ответа';
         } else {
-            this.surveyResult[question.attr('id')] = checkedRadio.siblings('label').text();
+            this.surveyResult[question.attr('id')] = {
+                'type': question.data('question-type'),
+                'value': checkedRadio.siblings('label').text(),
+            }
         }
     };
     this.checkboxValidator = function(question){
@@ -43,7 +50,10 @@ function Survey(survey){
                 checkboxValues.push(checkboxValue);
             })
 
-            this.surveyResult[question.attr('id')] = checkboxValues;
+            this.surveyResult[question.attr('id')] = {
+                'type': question.data('question-type'),
+                'value': checkboxValues,
+            }
         }
     };
     this.validators = {
@@ -93,7 +103,7 @@ function Survey(survey){
     this.send = function(){
         /*Отправка данных по опросу*/
         $.ajax({
-            url: '/surveys/result/save/',
+            url: this.API_URL,
             type: 'POST',
             headers: {"X-CSRFToken": this.getCSRFTokenValue()},
             data: JSON.stringify({'result': this.surveyResult}),
@@ -107,7 +117,7 @@ function Survey(survey){
 }
 
 $(document).ready(function(){
-    $('#survey').submit(function(){
+    $('.survey').submit(function(){
         var survey = new Survey($(this));
 
         (survey.isValid()) ? survey.send() : survey.renderErrors();

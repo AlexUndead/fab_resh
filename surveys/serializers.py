@@ -4,7 +4,8 @@ from .models import Result
 
 class SurveyResultSerialize(serializers.ModelSerializer):
     """Сериализатор результата прохождения опроса"""
+    result = serializers.JSONField()
 
     class Meta:
         model = Result
-        fields = '__all__'
+        fields = ('result', 'user_id')

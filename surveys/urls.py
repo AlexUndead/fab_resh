@@ -43,14 +43,18 @@ urlpatterns = [
         name='customer_surveys_view'
     ),
     path(
-        'surveys/run/<int:survey_id>/',
+        'survey/run/<int:survey_id>/',
         views.CustomerSurveyRun.as_view(),
         name='customer_survey_run'
     ),
     path(
-        'surveys/result/save/',
-        views.CustomerSurveySave.as_view(),
+        'survey/result/save/',
+        views.CustomerSurveyResultSave.as_view(),
         name='customer_survey_save'
     ),
-
+    path(
+        'survey/result/view/<slug:slug>/',
+        views.CustomerSurveyResultView.as_view(),
+        name='customer_survey_view'
+    ),
 ]

@@ -4,6 +4,7 @@ from rest_framework import generics, permissions
 from .models import Survey, Question, Answer, Result
 from .forms import SurveyForm, QuestionForm, AnswerForm
 from .serializers import SurveyResultSerialize
+import json
 
 
 class IndexView(View):
@@ -201,15 +202,68 @@ class CustomerSurveyRun(View):
         return render(request, 'customer_survey_run.html', {'survey': survey})
 
 
-class CustomerSurveySave(generics.CreateAPIView):
+class CustomerSurveyResultSave(generics.CreateAPIView):
     """Страница сохранения результата прохождения опроса"""
-    #def post(self, request, *args, **kwargs):
-        # data = {
-        #     'user': request.user.id if request.user.id else 0,
-        #     'result': request.POST['result'],
-        # }
-        # super().post(request, *args, **kwargs)
+    def get_serializer(self, *args, **kwargs):
+        """
+        Добавления user_id если пользователь зарегистрирован и
+        перконвертирование результата в строковый фармат
+        """
+        serializer_class = self.get_serializer_class()
+        kwargs["context"] = self.get_serializer_context()
+        draft_request_data = self.request.data.copy()
+
+        if self.request.user.id:
+            draft_request_data['user_id'] = self.request.user.id
+
+        draft_request_data['result'] = json.dumps(self.request.data.get('result'), ensure_ascii=False)
+        kwargs['data'] = draft_request_data
+
+        return serializer_class(*args, **kwargs)
 
     serializer_class = SurveyResultSerialize
     queryset = Result.objects.all()
     permission_classes = (permissions.AllowAny, )
+
+
+class CustomerSurveyResultView(View):
+    """Страница просмотра результата опроса"""
+    def get(self, request, slug, *args, **kwargs):
+        customer_result_obj = get_object_or_404(Result, slug=slug)
+        customer_result_decode = json.loads(customer_result_obj.result)
+        self.validation_survey(customer_result_decode)
+        print(customer_result_decode)
+
+        return render(request, 'customer_survey_result_view.html', {'valid_survey_result': customer_result_decode})
+
+    def get_correct_answers(self, question_id):
+        answer_correct_type_id = 2
+        return Answer.objects.select_related('question').filter(
+            type=answer_correct_type_id,
+            question_id__in=question_id,
+        )
+
+    def open_answer_validator(self, correct_answers, customer_question_id, customer_answer):
+        customer_answer['correctly'] = True
+
+    def single_answer_validator(self, correct_answers, customer_question_id, customer_answer):
+        correct_answer = correct_answers.filter(question_id=customer_question_id).first().text
+        correctly = True if correct_answer == customer_answer else False
+        customer_answer['correctly'] = correctly
+        customer_answer['correct_answer'] = correct_answer
+
+    def multiple_answer_validator(self, correct_answers, customer_question_id, customer_answer):
+        correct_answer = set({answer.text for answer in correct_answers.filter(question_id=customer_question_id)})
+        correctly = True if correct_answer == set(customer_answer) else False
+        customer_answer['correctly'] = correctly
+        customer_answer['correct_answer'] = correct_answer
+
+    def validation_survey(self, customer_result):
+        correct_answers = self.get_correct_answers(customer_result.keys())
+        for customer_answer in customer_result:
+            if customer_result[customer_answer]['type'] == 1:
+                self.open_answer_validator(correct_answers, customer_answer, customer_result[customer_answer])
+            elif customer_result[customer_answer]['type'] == 2:
+                self.single_answer_validator(correct_answers, customer_answer, customer_result[customer_answer])
+            elif customer_result[customer_answer]['type'] == 3:
+                self.multiple_answer_validator(correct_answers, customer_answer, customer_result[customer_answer])
