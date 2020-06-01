@@ -33,6 +33,8 @@ class SurveyCreate(View):
         if form.is_valid():
             survey = form.save()
             return redirect('survey_view', survey_id=survey.id)
+        else:
+            return render(request, 'survey_create.html', {'form': form})
 
 
 class SurveyView(View):
@@ -54,8 +56,9 @@ class SurveyView(View):
 
         if form.is_valid():
             form.save()
-
-        return redirect('survey_view', survey_id=survey_id)
+            return redirect('survey_view', survey_id=survey_id)
+        else:
+            return render(request, 'survey_view.html', {'form': form, 'survey': survey})
 
 
 class SurveyDelete(View):
@@ -87,8 +90,9 @@ class QuestionCreate(View):
 
         if question_form.is_valid():
             question_form.save()
-
-        return redirect('survey_view', survey_id=survey_id)
+            return redirect('survey_view', survey_id=survey_id)
+        else:
+            return render(request, 'question_create.html', {'question_form': question_form})
 
 
 class QuestionView(View):
@@ -114,8 +118,10 @@ class QuestionView(View):
 
         if question_form.is_valid():
             question_form.save()
-
-        return redirect('question_view', survey_id=survey_id, question_id=question_id)
+            return redirect('question_view', survey_id=survey_id, question_id=question_id)
+        else:
+            question = get_object_or_404(Question, id=question_id)
+            return render(request, 'question_view.html', {'question_form': question_form, 'question': question})
 
 
 class QuestionDelete(View):
@@ -146,8 +152,9 @@ class AnswerCreate(View):
 
         if answer_form.is_valid():
             answer_form.save()
-
-        return redirect('question_view', survey_id=survey_id, question_id=question_id)
+            return redirect('question_view', survey_id=survey_id, question_id=question_id)
+        else:
+            return render(request, 'answer_create.html', {'answer_form': answer_form})
 
 
 class AnswerView(View):
@@ -172,8 +179,10 @@ class AnswerView(View):
 
         if answer_form.is_valid():
             answer_form.save()
-
-        return redirect('question_view', question_id=question_id, answer_id=answer_id)
+            return redirect('question_view', question_id=question_id, answer_id=answer_id)
+        else:
+            answer = get_object_or_404(Answer, id=answer_id)
+            return render(request, 'answer_view.html', {'answer_form': answer_form, 'answer': answer})
 
 
 class AnswerDelete(View):

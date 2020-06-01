@@ -3,6 +3,15 @@
 {% block content %}
 <div class="">
     <h1 class="mt-5">Страница просмотра и редактирования ответа</h1>
+    {% for field in answer_form %}
+        <div class="form-group">
+            {% if field.errors %}
+            <div class="alert alert-danger" role="alert">
+                {{ field.errors }}
+            </div>
+            {% endif %}
+        </div>
+    {% endfor %}
     <div class="container">
         <form action="" class="form-signin" method="post">
             <div class="form-group">
@@ -10,12 +19,10 @@
                 <div class="h4">Настройки ответа</div>
                 <hr>
                 <div class="form-group">
-                    {{ answer_form.text.errors }}
                     <label for="{{ answer_form.text.id_for_label }}">{{ answer_form.text.label }}</label>
                     {{ answer_form.text }}
                 </div>
                 <div class="form-group">
-                    {{ answer_form.type.errors }}
                     <label for="{{ answer_form.type.id_for_label }}">{{ answer_form.type.label }}</label>
                     {{ answer_form.type }}
                 </div>

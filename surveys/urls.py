@@ -23,17 +23,17 @@ urlpatterns = [
         name='question_delete'
     ),
     path(
-        'admin/survey/<int:survey_id>/question/<int:question_id>/create/',
+        'admin/survey/<int:survey_id>/question/<int:question_id>/answer/create/',
         views.AnswerCreate.as_view(),
         name='answer_create'
     ),
     path(
-        'admin/survey/<int:survey_id>/question/<int:question_id>/view/<int:answer_id>/',
+        'admin/survey/<int:survey_id>/question/<int:question_id>/answer/view/<int:answer_id>/',
         views.AnswerView.as_view(),
         name='answer_view'
     ),
     path(
-        'admin/survey/<int:survey_id>/question/<int:question_id>/delete/<int:answer_id>/',
+        'admin/survey/<int:survey_id>/question/<int:question_id>/answer/delete/<int:answer_id>/',
         views.AnswerDelete.as_view(),
         name='answer_delete'
     ),

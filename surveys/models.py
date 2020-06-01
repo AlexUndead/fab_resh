@@ -6,8 +6,8 @@ from .utils import unique_slug_generator
 class Survey(models.Model):
     """Модель опроса"""
     name = models.CharField(max_length=255, verbose_name='Имя опроса')
-    create_at = models.DateTimeField(blank=True, null=True, verbose_name='Дата старта опроса')
-    end_at = models.DateTimeField(blank=True, null=True, verbose_name='Дата окончания опроса')
+    create_at = models.DateTimeField(blank=True, null=True, verbose_name='Дата старта опроса. Формат: YYYY-MM-DD HH:MM:SS')
+    end_at = models.DateTimeField(blank=True, null=True, verbose_name='Дата окончания опроса. Формат: YYYY-MM-DD HH:MM:SS')
     description = models.CharField(max_length=255, verbose_name='Описание опроса')
 
 

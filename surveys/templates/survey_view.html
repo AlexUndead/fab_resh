@@ -4,6 +4,15 @@
 <div class="">
     <h1 class="mt-5">Страница просмотра и редактирования опроса</h1>
     <div class="container">
+        {% for field in form %}
+            <div class="form-group">
+                {% if field.errors %}
+                    <div class="alert alert-danger" role="alert">
+                        {{ field.errors }}
+                    </div>
+                {% endif %}
+            </div>
+        {% endfor %}
         <form action="" class="form-signin" method="post">
             <div class="form-group">
                 {% csrf_token %}
@@ -11,7 +20,6 @@
                 <hr>
                 {% for input in form %}
                     <div class="form-group">
-                        {{ input.errors }}
                         <label for="{{ input.id_for_label }}">{{ input.label }}</label>
                         {{ input }}
                     </div>
@@ -21,7 +29,7 @@
         </form>
         <form class="form-signin" action="{% url 'survey_delete' survey_id=survey.id %}" method="post">
             {% csrf_token %}
-            <input type="submit" class="btn btn-lg btn-danger btn-block" value="Удалить опрос">
+            <input type="submit" class="btn btn-lg btn-danger" value="Удалить опрос">
         </form>
         <hr>
         <h2 class="text-center">Вопросы</h2>
