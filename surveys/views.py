@@ -244,19 +244,24 @@ class CustomerSurveyResultView(View):
         )
 
     def open_answer_validator(self, correct_answers, customer_question_id, customer_answer):
-        customer_answer['correctly'] = True
+        customer_answer['question'] = Question.objects.get(id=customer_question_id).text
+        customer_answer['correctly'] = None
 
     def single_answer_validator(self, correct_answers, customer_question_id, customer_answer):
-        correct_answer = correct_answers.filter(question_id=customer_question_id).first().text
-        correctly = True if correct_answer == customer_answer else False
+        correct_answer = correct_answers.filter(question_id=customer_question_id).first()
+        correct_answer_text = correct_answer.text
+        correctly = True if correct_answer_text == customer_answer['value'] else False
+        customer_answer['question'] = correct_answer.question.text
         customer_answer['correctly'] = correctly
-        customer_answer['correct_answer'] = correct_answer
+        customer_answer['correct_answer'] = correct_answer_text
 
     def multiple_answer_validator(self, correct_answers, customer_question_id, customer_answer):
-        correct_answer = set({answer.text for answer in correct_answers.filter(question_id=customer_question_id)})
-        correctly = True if correct_answer == set(customer_answer) else False
+        correct_answer = correct_answers.filter(question_id=customer_question_id)
+        correct_answer_set = {answer.text for answer in correct_answer}
+        correctly = True if correct_answer_set == set(customer_answer['value']) else False
+        customer_answer['question'] = correct_answer.first().question.text
         customer_answer['correctly'] = correctly
-        customer_answer['correct_answer'] = correct_answer
+        customer_answer['correct_answer'] = correct_answer_set
 
     def validation_survey(self, customer_result):
         correct_answers = self.get_correct_answers(customer_result.keys())

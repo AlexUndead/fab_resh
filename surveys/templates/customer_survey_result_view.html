@@ -1,13 +1,11 @@
 {% extends "base.html" %}
-{% load answer_field_template %}
+{% load survey_result_template %}
 
 {% block content %}
 <div class="">
     <h1 class="mt-5">Страница просмотра результата опроса</h1>
     <div class="container">
-        {% for answer in valid_survey_result %}
-            {{ answer }}
-        {% endfor %}
+        {% draw_survey_result valid_survey_result %}
     </div>
 </div>
 {% endblock %}

@@ -8,13 +8,9 @@
         <form id="{{ survey.id }}" class="survey" action="">
             {% csrf_token %}
             {% for question in survey.question_set.all %}
-                <div id="{{ question.id }}"
-                     class="question card mb-4 shadow-sm"
-                     data-question-type="{{ question.type }}"
-                >
-                    <div class="card-header">
-                        {{ question.text }}
-                    </div>
+                <div id="{{ question.id }}" class="question card mb-4 shadow-sm"
+                     data-question-type="{{ question.type }}">
+                    <div class="card-header">{{ question.text }}</div>
                     <div class="card-body">
                         {% if question.answer_set.all|length %}
                             <div class="row">
