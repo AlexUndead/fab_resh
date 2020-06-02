@@ -4,7 +4,19 @@ from rest_framework import generics, permissions
 from .models import Survey, Question, Answer, Result
 from .forms import SurveyForm, QuestionForm, AnswerForm
 from .serializers import SurveyResultSerialize
+from .validator import SurveyValidator
 import json
+
+
+def create_date_redirect(func):
+    """декоратор редиректящий если у опроса есть дата старта"""
+    def wrapper(self, request, survey_id, *args, **kwargs):
+        if get_object_or_404(Survey, id=survey_id).create_at:
+            return redirect('survey_error')
+
+        return func(self, request, survey_id, *args, **kwargs)
+
+    return wrapper
 
 
 class IndexView(View):
@@ -27,6 +39,7 @@ class SurveyCreate(View):
         form = SurveyForm()
         return render(request, 'survey_create.html', {'form': form})
 
+    @create_date_redirect
     def post(self, request, *args, **kwargs):
         form = SurveyForm(request.POST)
 
@@ -35,6 +48,12 @@ class SurveyCreate(View):
             return redirect('survey_view', survey_id=survey.id)
         else:
             return render(request, 'survey_create.html', {'form': form})
+
+
+class SurveyError(View):
+    """Страница ошибки при изменении опроса с заданной датой начало"""
+    def get(self, request):
+        return render(request, 'survey_error.html', {})
 
 
 class SurveyView(View):
@@ -50,6 +69,7 @@ class SurveyView(View):
         form = SurveyForm(data)
         return render(request, 'survey_view.html', {'form': form, 'survey': survey})
 
+    @create_date_redirect
     def post(self, request, survey_id, *args, **kwargs):
         survey = get_object_or_404(Survey, id=survey_id)
         form = SurveyForm(request.POST, instance=survey)
@@ -66,6 +86,7 @@ class SurveyDelete(View):
     def get(self, request, survey_id, *args, **kwargs):
         return redirect('survey_view', survey_id=survey_id)
 
+    @create_date_redirect
     def post(self, request, survey_id, *args, **kwargs):
         survey = get_object_or_404(Survey, id=survey_id)
         survey.delete()
@@ -80,6 +101,7 @@ class QuestionCreate(View):
 
         return render(request, 'question_create.html', {'question_form': question_form})
 
+    @create_date_redirect
     def post(self, request, survey_id, *args, **kwargs):
         data = {
             'survey': survey_id,
@@ -108,6 +130,7 @@ class QuestionView(View):
 
         return render(request, 'question_view.html', {'question_form': question_form, 'question': question})
 
+    @create_date_redirect
     def post(self, request, survey_id, question_id, *args, **kwargs):
         data = {
             'text': request.POST['text'],
@@ -129,6 +152,7 @@ class QuestionDelete(View):
     def get(self, request, survey_id, question_id, *args, **kwargs):
         return redirect('survey_view', survey_id=survey_id)
 
+    @create_date_redirect
     def post(self, request, survey_id, question_id, *args, **kwargs):
         question = get_object_or_404(Question, id=question_id)
         question.delete()
@@ -142,6 +166,7 @@ class AnswerCreate(View):
         answer_form = AnswerForm()
         return render(request, 'answer_create.html', {'answer_form': answer_form})
 
+    @create_date_redirect
     def post(self, request, survey_id, question_id, *args, **kwargs):
         data = {
             'text': request.POST['text'],
@@ -169,6 +194,7 @@ class AnswerView(View):
         answer_form = AnswerForm(data)
         return render(request, 'answer_view.html', {'answer_form': answer_form, 'answer':answer})
 
+    @create_date_redirect
     def post(self, request, survey_id, question_id, answer_id, *args, **kwargs):
         data = {
             'text': request.POST['text'],
@@ -190,6 +216,7 @@ class AnswerDelete(View):
     def get(self, request, survey_id, question_id, answer_id, *args, **kwargs):
         return redirect('question_view', survey_id=survey_id, question_id=question_id)
 
+    @create_date_redirect
     def post(self, request, survey_id, question_id, answer_id, *args, **kwargs):
         answer = get_object_or_404(Answer, id=answer_id)
         answer.delete()
@@ -240,43 +267,7 @@ class CustomerSurveyResultView(View):
     def get(self, request, slug, *args, **kwargs):
         customer_result_obj = get_object_or_404(Result, slug=slug)
         customer_result_decode = json.loads(customer_result_obj.result)
-        self.validation_survey(customer_result_decode)
+        validator_survey = SurveyValidator(customer_result_decode)
+        valid_survey_result = validator_survey.validation()
 
-        return render(request, 'customer_survey_result_view.html', {'valid_survey_result': customer_result_decode})
-
-    def get_correct_answers(self, question_id):
-        answer_correct_type_id = 2
-        return Answer.objects.select_related('question').filter(
-            type=answer_correct_type_id,
-            question_id__in=question_id,
-        )
-
-    def open_answer_validator(self, correct_answers, customer_question_id, customer_answer):
-        customer_answer['question'] = Question.objects.get(id=customer_question_id).text
-        customer_answer['correctly'] = None
-
-    def single_answer_validator(self, correct_answers, customer_question_id, customer_answer):
-        correct_answer = correct_answers.filter(question_id=customer_question_id).first()
-        correct_answer_text = correct_answer.text
-        correctly = True if correct_answer_text == customer_answer['value'] else False
-        customer_answer['question'] = correct_answer.question.text
-        customer_answer['correctly'] = correctly
-        customer_answer['correct_answer'] = correct_answer_text
-
-    def multiple_answer_validator(self, correct_answers, customer_question_id, customer_answer):
-        correct_answer = correct_answers.filter(question_id=customer_question_id)
-        correct_answer_set = {answer.text for answer in correct_answer}
-        correctly = True if correct_answer_set == set(customer_answer['value']) else False
-        customer_answer['question'] = correct_answer.first().question.text
-        customer_answer['correctly'] = correctly
-        customer_answer['correct_answer'] = correct_answer_set
-
-    def validation_survey(self, customer_result):
-        correct_answers = self.get_correct_answers(customer_result.keys())
-        for customer_answer in customer_result:
-            if customer_result[customer_answer]['type'] == 1:
-                self.open_answer_validator(correct_answers, customer_answer, customer_result[customer_answer])
-            elif customer_result[customer_answer]['type'] == 2:
-                self.single_answer_validator(correct_answers, customer_answer, customer_result[customer_answer])
-            elif customer_result[customer_answer]['type'] == 3:
-                self.multiple_answer_validator(correct_answers, customer_answer, customer_result[customer_answer])
+        return render(request, 'customer_survey_result_view.html', {'valid_survey_result': valid_survey_result})

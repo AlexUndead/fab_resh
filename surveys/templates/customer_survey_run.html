@@ -12,11 +12,11 @@
                      data-question-type="{{ question.type }}">
                     <div class="card-header">{{ question.text }}</div>
                     <div class="card-body">
-                        {% if question.answer_set.all|length %}
+                        {% if question.type != 1 %}
                             <div class="row">
                                 {% for answer in question.answer_set.all %}
                                     <div class="col-md-6">
-                                        {% draw_answer question.type answer.id answer.text %}
+                                        {% draw_answer question.id question.type answer.id answer.text %}
                                     </div>
                                 {% endfor %}
                             </div>

@@ -5,6 +5,7 @@ urlpatterns = [
     path('', views.IndexView.as_view(), name='index'),
     path('admin/surveys/view/', views.SurveysView.as_view(), name='surveys_view'),
     path('admin/survey/create/', views.SurveyCreate.as_view(), name='survey_create'),
+    path('admin/survey/error/', views.SurveyError.as_view(), name='survey_error'),
     path('admin/survey/view/<int:survey_id>/', views.SurveyView.as_view(), name='survey_view'),
     path('admin/survey/delete/<int:survey_id>/', views.SurveyDelete.as_view(), name='survey_delete'),
     path(
