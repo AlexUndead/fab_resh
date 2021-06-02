@@ -12,3 +12,8 @@ docker exec -it {DOCKER_NAME} python manage.py createsuperuser
 Так же в репозитории есть Insomnia фаил для API client приложения
 
 
+UPD
+---
+Не получилось выполнить ограничение по зависимостям т.к. библиотека для работы с документацией (drf-yasg) работает только с 3 версией django
+
+
