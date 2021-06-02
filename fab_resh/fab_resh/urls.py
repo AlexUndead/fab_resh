@@ -16,10 +16,20 @@ schema_view = get_schema_view(
 )
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('survey/', view=include('survey.urls.survey_urls', namespace='survey')),
-    path('question/', view=include('survey.urls.question_urls', namespace='question')),
+    path(
+        'survey/',
+        view=include('survey.urls.survey_urls', namespace='survey')
+    ),
+    path(
+        'question/',
+        view=include('survey.urls.question_urls', namespace='question')
+    ),
 ]
 
 urlpatterns += [
-    url(r'^swagger/$', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+    url(
+        r'^swagger/$',
+        schema_view.with_ui('swagger', cache_timeout=0),
+        name='schema-swagger-ui'
+    ),
 ]
